@@ -5,647 +5,740 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>NeuroForge — Holographic Preview</title>
 <style>
-*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+*{margin:0;padding:0;box-sizing:border-box}
 body{background:#000810;color:#00e5ff;font-family:'Courier New',monospace;overflow:hidden;user-select:none}
-canvas{display:block}
-nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;padding:0 28px;height:52px;background:rgba(0,8,16,.96);border-bottom:1px solid #001a2e;backdrop-filter:blur(12px)}
+canvas{display:block;position:fixed;inset:0;top:52px}
+nav{position:fixed;top:0;left:0;right:0;z-index:10;display:flex;align-items:center;padding:0 28px;height:52px;background:rgba(0,8,16,.97);border-bottom:1px solid #001a2e}
 .brand{font-size:13px;letter-spacing:4px;color:#00e5ff;margin-right:48px}
-.tab-btn{background:transparent;border:none;border-bottom:2px solid transparent;color:#003344;font-family:'Courier New',monospace;font-size:11px;letter-spacing:3px;padding:0 20px;height:52px;cursor:pointer;transition:all .2s}
-.tab-btn.active{color:#00e5ff;border-bottom-color:#00e5ff}
-.tab-btn:hover{color:#007799}
-.status{margin-left:auto;font-size:10px;letter-spacing:3px;color:#002244;animation:blink 1.8s infinite}
+.tab{background:transparent;border:none;border-bottom:2px solid transparent;color:#003344;font-family:'Courier New',monospace;font-size:11px;letter-spacing:3px;padding:0 20px;height:52px;cursor:pointer;transition:all .2s}
+.tab.on{color:#00e5ff;border-bottom-color:#00e5ff}
+.tab:hover{color:#007799}
+.sys{margin-left:auto;font-size:10px;letter-spacing:3px;color:#002244;animation:blink 1.8s infinite}
 @keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
-#hud-bottom{position:fixed;bottom:0;left:0;right:0;z-index:100;display:flex;justify-content:space-between;align-items:center;padding:12px 28px;background:linear-gradient(0deg,rgba(0,8,16,.95),transparent);border-top:1px solid #001a2e;font-size:10px;letter-spacing:2px;color:#003344;pointer-events:none}
-.corner{position:fixed;width:18px;height:18px;opacity:.45;z-index:100;pointer-events:none}
+#hud{position:fixed;bottom:0;left:0;right:0;z-index:10;display:flex;justify-content:space-between;align-items:center;padding:11px 28px;background:linear-gradient(0deg,rgba(0,8,16,.97),transparent);border-top:1px solid #001a2e;font-size:10px;letter-spacing:2px;color:#003344;pointer-events:none}
+.corner{position:fixed;width:18px;height:18px;opacity:.45;z-index:10;pointer-events:none}
 .tl{top:60px;left:12px;border-top:1px solid #00e5ff;border-left:1px solid #00e5ff}
 .tr{top:60px;right:12px;border-top:1px solid #00e5ff;border-right:1px solid #00e5ff}
-.bl{bottom:44px;left:12px;border-bottom:1px solid #00e5ff;border-left:1px solid #00e5ff}
-.br{bottom:44px;right:12px;border-bottom:1px solid #00e5ff;border-right:1px solid #00e5ff}
-.panel{position:fixed;background:rgba(0,10,20,.95);border:1px solid #00e5ff;padding:22px 24px;font-family:'Courier New',monospace;z-index:200;display:none;box-shadow:0 0 40px rgba(0,229,255,.12);min-width:240px;backdrop-filter:blur(12px)}
-.panel.visible{display:block}
-#skill-panel{top:18%;right:3%}
-#dept-panel{top:18%;left:3%;min-width:260px}
-.panel-title{color:#00e5ff;font-size:13px;font-weight:bold;letter-spacing:2px;margin-bottom:6px}
-.panel-divider{width:100%;height:1px;background:#001a2e;margin-bottom:14px}
-.panel-desc{color:#0088aa;font-size:11px;line-height:1.7;margin-bottom:14px}
-.bar-label{color:#004455;font-size:10px;letter-spacing:2px;margin-bottom:6px}
-.bar-bg{height:3px;background:#001122;border-radius:2px;overflow:hidden;margin-bottom:14px}
-.bar-fill{height:100%;background:linear-gradient(90deg,#0044ff,#00ffff);width:0%;transition:width 1.2s ease}
-.panel-btn{background:transparent;border:1px solid #003344;color:#00e5ff;padding:5px 14px;cursor:pointer;font-family:inherit;font-size:10px;letter-spacing:2px;width:100%;margin-top:4px}
-.panel-btn:hover{border-color:#00e5ff}
-.agent-row{display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid #001122}
-.agent-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
-.agent-name{color:#0077aa;font-size:10px;letter-spacing:1px}
-.agent-status{margin-left:auto;font-size:9px}
+.bl{bottom:42px;left:12px;border-bottom:1px solid #00e5ff;border-left:1px solid #00e5ff}
+.br{bottom:42px;right:12px;border-bottom:1px solid #00e5ff;border-right:1px solid #00e5ff}
+.panel{position:fixed;background:rgba(0,8,20,.96);border:1px solid #00e5ff;padding:20px 22px;font-family:'Courier New',monospace;z-index:20;min-width:230px;box-shadow:0 0 40px rgba(0,229,255,.1);backdrop-filter:blur(8px);display:none}
+.panel.on{display:block}
+#sp{top:18%;right:3%}
+#dp{top:18%;left:3%;min-width:252px}
+.pt{font-size:12px;font-weight:bold;letter-spacing:2px;color:#00e5ff;margin-bottom:6px}
+.pdiv{height:1px;background:#001a2e;margin-bottom:12px}
+.pd{color:#0088aa;font-size:11px;line-height:1.7;margin-bottom:12px}
+.bl-lbl{color:#004455;font-size:10px;letter-spacing:2px;margin-bottom:5px}
+.bl-bg{height:3px;background:#001122;border-radius:2px;overflow:hidden;margin-bottom:12px}
+.bl-fill{height:100%;background:linear-gradient(90deg,#0044ff,#00ffff);width:0;transition:width 1.2s ease}
+.pbtn{background:transparent;border:1px solid #003344;color:#00e5ff;padding:4px 12px;cursor:pointer;font-family:inherit;font-size:10px;letter-spacing:2px;width:100%;margin-top:2px}
+.pbtn:hover{border-color:#00e5ff}
+.arow{display:flex;align-items:center;gap:7px;padding:4px 0;border-bottom:1px solid #001122}
+.adot{width:5px;height:5px;border-radius:50%;flex-shrink:0}
+.aname{color:#0077aa;font-size:10px;letter-spacing:1px}
+.ast{margin-left:auto;font-size:9px}
 </style>
-<script type="importmap">
-{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"}}
-</script>
 </head>
 <body>
-
 <nav>
   <span class="brand">NEUROFORGE</span>
-  <button class="tab-btn active" id="btn-hologram" onclick="switchScene('hologram')">AGENT HOLOGRAM</button>
-  <button class="tab-btn" id="btn-brain" onclick="switchScene('brain')">NEURAL MAP</button>
-  <span class="status">◉ SYSTEM ONLINE</span>
+  <button class="tab on" id="t-holo" onclick="switchTo('holo')">AGENT HOLOGRAM</button>
+  <button class="tab"    id="t-brain" onclick="switchTo('brain')">NEURAL MAP</button>
+  <span class="sys">◉ SYSTEM ONLINE</span>
 </nav>
-
-<div id="canvas-wrap" style="position:fixed;inset:0;top:52px"></div>
+<canvas id="c"></canvas>
 <div class="corner tl"></div><div class="corner tr"></div>
 <div class="corner bl"></div><div class="corner br"></div>
-
-<div id="hud-bottom">
-  <span id="hud-left">◉ HOLOGRAM ACTIVE</span>
+<div id="hud">
+  <span id="hl">◉ HOLOGRAM ACTIVE</span>
   <span>DRAG TO ROTATE  •  CLICK SKILLS TO INSPECT</span>
   <span style="animation:blink 1.8s infinite">●</span>
 </div>
 
-<div class="panel" id="skill-panel">
-  <div class="panel-title" id="sp-name">SKILL</div>
-  <div class="panel-divider"></div>
-  <div class="panel-desc" id="sp-desc"></div>
-  <div class="bar-label" id="sp-bar-lbl">PROFICIENCY</div>
-  <div class="bar-bg"><div class="bar-fill" id="sp-bar"></div></div>
-  <button class="panel-btn" onclick="closeSkillPanel()">[ CLOSE DATAFILE ]</button>
+<div class="panel" id="sp">
+  <div class="pt" id="sp-n">SKILL</div>
+  <div class="pdiv"></div>
+  <div class="pd" id="sp-d"></div>
+  <div class="bl-lbl" id="sp-l">PROFICIENCY</div>
+  <div class="bl-bg"><div class="bl-fill" id="sp-b"></div></div>
+  <button class="pbtn" onclick="closeSP()">[ CLOSE DATAFILE ]</button>
+</div>
+<div class="panel" id="dp">
+  <div class="pt" id="dp-n">DEPARTMENT</div>
+  <div class="pdiv"></div>
+  <div class="pd" id="dp-d"></div>
+  <div id="dp-a"></div>
+  <button class="pbtn" style="margin-top:10px" onclick="closeDP()">[ COLLAPSE CLUSTER ]</button>
 </div>
 
-<div class="panel" id="dept-panel">
-  <div class="panel-title" id="dp-name">DEPARTMENT</div>
-  <div class="panel-divider"></div>
-  <div class="panel-desc" id="dp-desc"></div>
-  <div id="dp-agents"></div>
-  <button class="panel-btn" onclick="closeDeptPanel()">[ COLLAPSE CLUSTER ]</button>
-</div>
+<script>
+// ── DATA ──────────────────────────────────────────────────────────────────────
+const SKILLS=[
+  {name:'MACHINE LEARNING', level:95, desc:'Deep neural network design & training pipelines.'},
+  {name:'NLP PROCESSING',   level:88, desc:'Language model fine-tuning and RAG systems.'},
+  {name:'COMPUTER VISION',  level:82, desc:'Real-time image analysis and segmentation.'},
+  {name:'DATA ENGINEERING', level:79, desc:'Distributed processing at petabyte scale.'},
+  {name:'API DESIGN',       level:91, desc:'RESTful & GraphQL microservice architecture.'},
+  {name:'CLOUD DEPLOY',     level:85, desc:'Kubernetes orchestration across multi-cloud.'},
+]
+const DEPTS=[
+  {n:'RESEARCH CORE',    c:'#00e5ff', desc:'Advanced AI research cluster.',   ag:[{n:'NEXUS',a:1},{n:'ARIA',a:1},{n:'HELIOS',a:0}]},
+  {n:'DATA MINING',      c:'#0088ff', desc:'Data extraction & recognition.',  ag:[{n:'VECTOR',a:1},{n:'SIGMA',a:1}]},
+  {n:'NEURAL SYNTHESIS', c:'#00ffaa', desc:'Knowledge synthesis node.',       ag:[{n:'LYRA',a:1},{n:'ORION',a:1},{n:'PULSE',a:0},{n:'ECHO',a:1}]},
+  {n:'DEPLOYMENT',       c:'#ff6600', desc:'Production orchestration.',       ag:[{n:'TITAN',a:1},{n:'ATLAS',a:0}]},
+  {n:'SECURITY',         c:'#aa00ff', desc:'Threat detection & compliance.',  ag:[{n:'SHIELD',a:1},{n:'CIPHER',a:1}]},
+  {n:'ANALYTICS',        c:'#ffcc00', desc:'Metrics & predictive analytics.', ag:[{n:'PRISM',a:1},{n:'LENS',a:0}]},
+]
 
-<script type="module">
-import * as THREE from 'three'
-import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
-import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js'
-import { RenderPass } from 'three/addons/postprocessing/RenderPass.js'
-import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js'
-
-// ── SHADERS ──────────────────────────────────────────────────────────────────
-
-const AVATAR_VERT = `
-varying vec2 vUv;
-void main(){vUv=uv;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}
-`
-const AVATAR_FRAG = `
-uniform sampler2D map;uniform float time;uniform float opacity;uniform vec3 glow;
-varying vec2 vUv;
-float rand(vec2 c){return fract(sin(dot(c,vec2(12.9898,78.233)))*43758.5453);}
-void main(){
-  float gs=floor(time*8.);
-  float gb=step(rand(vec2(gs,.7)),vUv.y)*step(vUv.y,rand(vec2(gs,.5))+.12);
-  float gstr=step(.93,rand(vec2(gs,.3)));
-  vec2 uv=vUv+vec2(gstr*gb*(rand(vec2(gs))-.5)*.05,0.);
-  vec4 tex=texture2D(map,clamp(uv,0.,1.));
-  if(tex.a<.04)discard;
-  float scan=pow(sin(vUv.y*320.-time*4.)*.5+.5,10.)*.18;
-  float fine=sin(vUv.y*1200.+time*14.)*.012;
-  float flick=1.-.07*sin(time*19.)*sin(time*7.+2.);
-  vec3 col=mix(tex.rgb,glow,.28)+glow*scan+fine;
-  float edge=min(min(vUv.x,1.-vUv.x),min(vUv.y,1.-vUv.y));
-  col+=glow*.6*(1.-smoothstep(0.,.12,edge));
-  gl_FragColor=vec4(col,tex.a*opacity*flick);
+// ── CANVAS SETUP ──────────────────────────────────────────────────────────────
+const cv = document.getElementById('c')
+const ctx = cv.getContext('2d')
+let W, H
+function resize() {
+  W = cv.width  = window.innerWidth
+  H = cv.height = window.innerHeight - 52
 }
-`
-const BEAM_VERT = `
-varying vec2 vUv;varying float vH;
-void main(){vUv=uv;vH=(position.y+1.)*.5;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}
-`
-const BEAM_FRAG = `
-uniform float time;uniform vec3 col;uniform float opacity;
-varying vec2 vUv;varying float vH;
-void main(){
-  float r=length(vUv-.5)*2.;
-  float cone=1.-smoothstep((1.-vH)*.8,(1.-vH),r);
-  float scan=pow(sin(vH*55.-time*5.)*.5+.5,5.)*.35;
-  float core=max(0.,(1.-r)*(1.-vH*.5))*.5;
-  float p=.8+.2*sin(time*2.5);
-  gl_FragColor=vec4(col,(core+scan*cone)*opacity*p);
-}
-`
-const PART_VERT = `
-attribute float aSize;attribute float aLife;attribute vec3 aVel;
-uniform float time;varying float vA;
-void main(){
-  float t=fract(time*.4+aLife);
-  vec3 p=position+aVel*t*2.5;p.y+=t*1.8;
-  vA=(1.-t)*(1.-t);
-  vec4 mv=modelViewMatrix*vec4(p,1.);
-  gl_PointSize=aSize*(220./-mv.z);gl_Position=projectionMatrix*mv;
-}
-`
-const PART_FRAG = `
-uniform vec3 col;varying float vA;
-void main(){
-  float d=length(gl_PointCoord-.5)*2.;
-  if(d>1.)discard;
-  gl_FragColor=vec4(col,(1.-d)*vA);
-}
-`
-const BRAIN_VERT = `
-uniform float time;varying vec3 vN;varying vec3 vP;
-float h(vec3 p){p=fract(p*.3183+.1);p*=17.;return fract(p.x*p.y*p.z*(p.x+p.y+p.z));}
-float n3(vec3 x){vec3 i=floor(x),f=fract(x);f=f*f*(3.-2.*f);
-  return mix(mix(mix(h(i),h(i+vec3(1,0,0)),f.x),mix(h(i+vec3(0,1,0)),h(i+vec3(1,1,0)),f.x),f.y),
-             mix(mix(h(i+vec3(0,0,1)),h(i+vec3(1,0,1)),f.x),mix(h(i+vec3(0,1,1)),h(i+vec3(1,1,1)),f.x),f.y),f.z);}
-void main(){
-  vN=normalize(normalMatrix*normal);
-  vec3 p=position;
-  p+=normal*(n3(p*2.2+time*.25)*.18+n3(p*4.8-time*.18)*.09+n3(p*9.+time*.4)*.04);
-  vP=p;gl_Position=projectionMatrix*modelViewMatrix*vec4(p,1.);
-}
-`
-const BRAIN_FRAG = `
-uniform float time;uniform vec3 base;uniform vec3 glow;uniform float opacity;
-varying vec3 vN;varying vec3 vP;
-void main(){
-  float fr=pow(1.-abs(dot(normalize(vN),vec3(0,0,1))),1.6);
-  float sc=pow(sin(vP.y*14.+time*2.5)*.5+.5,7.)*.45;
-  float pu=.5+.5*sin(time*1.8);
-  float fl=pow(max(0.,sin(time*.7)*sin(time*1.3)),8.)*.4;
-  vec3 c=mix(base,glow,fr*.75+sc+pu*.08+fl);
-  gl_FragColor=vec4(c,opacity*(.25+fr*.55+sc*.2+fl));
-}
-`
+resize()
+window.addEventListener('resize', resize)
 
-// ── TEXTURE HELPERS ──────────────────────────────────────────────────────────
+let view = 'holo'
+let t = 0
+let selSkill = -1
+let selDept  = -1
+let expandT  = 0   // time since dept selected (for agent expansion animation)
 
-function makeAvatarTex() {
-  const S=512, cv=document.createElement('canvas')
-  cv.width=cv.height=S
-  const c=cv.getContext('2d')
+// ── HELPERS ──────────────────────────────────────────────────────────────────
+function hex2rgb(h){
+  const r=parseInt(h.slice(1,3),16), g=parseInt(h.slice(3,5),16), b=parseInt(h.slice(5,7),16)
+  return [r,g,b]
+}
+function glow(color, blur=18){ctx.shadowColor=color; ctx.shadowBlur=blur}
+function noGlow(){ctx.shadowBlur=0}
+function lerp(a,b,t){return a+(b-a)*t}
+function easeOut(t){return 1-(1-t)*(1-t)}
 
-  c.fillStyle='#001122'; c.fillRect(0,0,S,S)
-  const bg=c.createRadialGradient(256,256,40,256,256,270)
-  bg.addColorStop(0,'rgba(0,80,120,.55)'); bg.addColorStop(1,'rgba(0,10,20,0)')
-  c.fillStyle=bg; c.fillRect(0,0,S,S)
+// ── PARTICLES (hologram scene) ────────────────────────────────────────────────
+const PARTS = Array.from({length:160},()=>({
+  x:(Math.random()-.5)*1.8,
+  y:(Math.random()-.3)*2.4,
+  vx:(Math.random()-.5)*.5,
+  vy:Math.random()*.18+.04,
+  life:Math.random(),
+  sz:Math.random()*2+1,
+}))
 
-  c.strokeStyle='#00e5ff'; c.lineWidth=2.5
-  c.shadowColor='#00e5ff'; c.shadowBlur=16
+// ── STARS ─────────────────────────────────────────────────────────────────────
+const STARS = Array.from({length:180},()=>({
+  x:Math.random()*2-1,
+  y:Math.random()*2-1,
+  r:Math.random()*.8+.1,
+  a:Math.random(),
+}))
+
+// ── DRAW HOLOGRAM SCENE ──────────────────────────────────────────────────────
+function drawHolo() {
+  const cx = W/2, cy = H/2
+
+  // BG
+  ctx.fillStyle = '#000810'
+  ctx.fillRect(0,0,W,H)
+
+  // Stars
+  STARS.forEach(s=>{
+    const sx = cx + s.x*W*.55, sy = cy + s.y*H*.5
+    ctx.beginPath()
+    ctx.arc(sx,sy,s.r,0,Math.PI*2)
+    ctx.fillStyle = `rgba(255,255,255,${s.a*.55})`
+    ctx.fill()
+  })
+
+  // ── GRID FLOOR (perspective) ──
+  ctx.save()
+  const gh = H*.38  // horizon line
+  const gLines = 14, gCols = 14
+  ctx.strokeStyle = '#002233'
+  ctx.lineWidth = .7
+  // horizontal grid lines
+  for(let i=0;i<=gLines;i++){
+    const prog = i/gLines
+    const yy = lerp(cy+H*.12, H+20, prog*prog)
+    const ww = lerp(0, W*1.4, prog*prog)
+    const xx = cx - ww/2
+    ctx.beginPath(); ctx.moveTo(xx, yy); ctx.lineTo(xx+ww, yy); ctx.stroke()
+  }
+  // vertical grid lines
+  for(let j=0;j<=gCols;j++){
+    const prog = j/gCols
+    const bx = lerp(cx-W*.7, cx+W*.7, prog)
+    ctx.beginPath(); ctx.moveTo(cx + (bx-cx)*.0, cy+H*.12); ctx.lineTo(bx, H+20); ctx.stroke()
+  }
+  // Concentric circles on floor (faint cyan)
+  ;[.28,.5,.72,.95].forEach((r,i)=>{
+    ctx.save()
+    ctx.translate(cx, cy+H*.38)
+    ctx.scale(1,.22)
+    ctx.beginPath(); ctx.arc(0,0,W*r*.32,0,Math.PI*2)
+    ctx.strokeStyle=`rgba(0,229,255,${.07/(i+1)})`
+    ctx.lineWidth=1.5; ctx.stroke()
+    ctx.restore()
+  })
+  ctx.restore()
+
+  // ── PROJECTION BEAM ──
+  const beamH = H*.55
+  const beamW = W*.08
+  const beamTop = cy - H*.28
+  const beamBot = cy + H*.3
+
+  ctx.save()
+  // outer beam
+  const beamGrad = ctx.createLinearGradient(cx, beamTop, cx, beamBot)
+  const bp = .5 + .5*Math.sin(t*2.5)
+  beamGrad.addColorStop(0, `rgba(0,229,255,0)`)
+  beamGrad.addColorStop(.4, `rgba(0,229,255,${.06*bp})`)
+  beamGrad.addColorStop(1, `rgba(0,229,255,${.18*bp})`)
+  ctx.beginPath()
+  ctx.moveTo(cx, beamTop)
+  ctx.lineTo(cx - beamW*3, beamBot)
+  ctx.lineTo(cx + beamW*3, beamBot)
+  ctx.closePath()
+  ctx.fillStyle = beamGrad; ctx.fill()
+
+  // inner bright beam
+  const ibGrad = ctx.createLinearGradient(cx,beamTop,cx,beamBot)
+  ibGrad.addColorStop(0,`rgba(0,229,255,0)`)
+  ibGrad.addColorStop(.5,`rgba(0,229,255,${.1*bp})`)
+  ibGrad.addColorStop(1,`rgba(0,229,255,${.35*bp})`)
+  ctx.beginPath()
+  ctx.moveTo(cx, beamTop)
+  ctx.lineTo(cx - beamW, beamBot)
+  ctx.lineTo(cx + beamW, beamBot)
+  ctx.closePath()
+  ctx.fillStyle = ibGrad; ctx.fill()
+
+  // scan bands inside beam
+  for(let s=0;s<5;s++){
+    const scanY = beamBot - ((t*60 + s*35) % beamH)
+    const scanProg = 1 - (scanY - beamTop)/(beamBot - beamTop)
+    const scanW = beamW*3*scanProg
+    ctx.beginPath()
+    ctx.moveTo(cx-scanW*.5, scanY)
+    ctx.lineTo(cx+scanW*.5, scanY)
+    ctx.strokeStyle=`rgba(0,229,255,${.15*bp})`; ctx.lineWidth=.8; ctx.stroke()
+  }
+
+  // base disc glow
+  ctx.save(); ctx.translate(cx, beamBot); ctx.scale(1,.18)
+  const dg = ctx.createRadialGradient(0,0,0,0,0,beamW*3)
+  dg.addColorStop(0,`rgba(0,229,255,${.25*bp})`)
+  dg.addColorStop(1,'rgba(0,229,255,0)')
+  ctx.beginPath(); ctx.arc(0,0,beamW*3,0,Math.PI*2)
+  ctx.fillStyle=dg; ctx.fill(); ctx.restore()
+  ctx.restore()
+
+  // ── ORBIT RINGS ──
+  const rings = [{r:.34,tilt:.05},{r:.46,tilt:.55},{r:.58,tilt:-.44},{r:.7,tilt:.8}]
+  rings.forEach(({r,tilt},i)=>{
+    ctx.save(); ctx.translate(cx,cy)
+    ctx.rotate(tilt); ctx.scale(1, Math.abs(Math.sin(tilt+.7))*.5+.15)
+    ctx.beginPath(); ctx.arc(0,0,W*r*.27,0,Math.PI*2)
+    ctx.strokeStyle=`rgba(0,229,255,${.1+i*.02})`; ctx.lineWidth=1; ctx.stroke()
+    ctx.restore()
+  })
+
+  // ── AVATAR ──
+  drawAvatar(cx, cy, t)
+
+  // ── PARTICLES ──
+  PARTS.forEach(p=>{
+    const lt = (t*.5 + p.life) % 1
+    const px = cx + (p.x + p.vx*lt*2.2)*W*.14
+    const py = (cy - H*.22) + (p.y + p.vy*lt*1.8 + lt*1.5)*H*.22
+    const alpha = (1-lt)*(1-lt)*.7
+    glow('#00e5ff',8)
+    ctx.beginPath(); ctx.arc(px,py,p.sz,0,Math.PI*2)
+    ctx.fillStyle=`rgba(0,229,255,${alpha})`; ctx.fill()
+  })
+  noGlow()
+
+  // ── SKILL TAGS ──
+  const tagRects = []
+  SKILLS.forEach((sk,i)=>{
+    const orR = (1.5 + (i%3)*.75) * W*.09
+    const spd = .22 + i*.06
+    const orY = (i%2===0 ? .22 : -.16) + i*.03
+    const a = (i/SKILLS.length)*Math.PI*2 + t*spd
+    const tx = cx + Math.cos(a)*orR
+    const ty = cy + Math.sin(a)*orR*.38 + orY*H*.3
+
+    const tw=130, th=32
+    const sel = selSkill===i
+    const hover = hoverIdx===i
+
+    ctx.save()
+    // panel
+    ctx.fillStyle = sel ? '#00e5ff' : 'rgba(0,18,42,.92)'
+    ctx.strokeStyle = hover||sel ? '#00e5ff' : '#006688'
+    ctx.lineWidth = 1
+    if(sel||hover){glow('#00e5ff',12)}
+    roundRect(ctx, tx-tw/2, ty-th/2, tw, th, 1)
+    ctx.fill(); ctx.stroke()
+    noGlow()
+
+    // corner accents
+    const co = sel?'#001122':'#00e5ff'
+    ;[[tx-tw/2,ty-th/2],[tx+tw/2,ty-th/2],[tx-tw/2,ty+th/2],[tx+tw/2,ty+th/2]].forEach(([qx,qy])=>{
+      ctx.fillStyle=co; ctx.fillRect(qx-2.5,qy-2.5,5,5)
+    })
+
+    // text
+    ctx.fillStyle = sel?'#001122':'#00e5ff'
+    ctx.font = 'bold 9px Courier New'
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle'
+    if(!sel) glow('#00e5ff',7)
+    ctx.fillText(sk.name, tx, ty)
+    noGlow()
+
+    // level bar
+    if(!sel){
+      const bw = tw*.8, bh = 2
+      ctx.fillStyle='#001a2e'; ctx.fillRect(tx-bw/2, ty+th/2-5, bw, bh)
+      ctx.fillStyle='#00e5ff'; ctx.fillRect(tx-bw/2, ty+th/2-5, bw*sk.level/100, bh)
+    }
+
+    ctx.restore()
+    tagRects.push({x:tx-tw/2, y:ty-th/2, w:tw, h:th, i})
+  })
+  window._tagRects = tagRects
+
+  // ── AGENT NAME ──
+  ctx.font='bold 14px Courier New'; ctx.textAlign='center'; ctx.textBaseline='middle'
+  ctx.fillStyle='#00e5ff'
+  glow('#00e5ff',20)
+  ctx.fillText('NEXUS', cx, cy+H*.36)
+  noGlow()
+  ctx.font='10px Courier New'; ctx.fillStyle='#005577'
+  ctx.fillText('SENIOR AI ARCHITECT', cx, cy+H*.41)
+}
+
+function drawAvatar(cx, cy, t) {
+  const sc = Math.min(W,H)*.0026
+  ctx.save()
+  ctx.translate(cx, cy - H*.04)
+
+  // Glow aura
+  const aura = ctx.createRadialGradient(0,0,10*sc,0,0,120*sc)
+  aura.addColorStop(0,'rgba(0,229,255,.07)')
+  aura.addColorStop(1,'rgba(0,229,255,0)')
+  ctx.fillStyle=aura; ctx.fillRect(-130*sc,-160*sc,260*sc,320*sc)
+
+  // Flickering
+  const flick = 1 - .06*Math.sin(t*19)*Math.sin(t*7+2)
+
+  // Edge glow rect
+  ctx.save()
+  glow('#00e5ff',22)
+  ctx.strokeStyle=`rgba(0,229,255,${.55*flick})`; ctx.lineWidth=1.2
+  ctx.strokeRect(-102*sc,-145*sc,204*sc,285*sc)
+  noGlow()
+  ctx.restore()
+
+  // Body - draw holographic humanoid
+  ctx.strokeStyle=`rgba(0,229,255,${.9*flick})`
+  ctx.lineWidth=2*sc; glow('#00e5ff',14)
 
   // Head
-  c.beginPath(); c.ellipse(256,168,76,92,0,0,Math.PI*2); c.stroke()
+  ctx.beginPath(); ctx.ellipse(0,-95*sc,42*sc,52*sc,0,0,Math.PI*2); ctx.stroke()
 
   // Eyes
-  c.fillStyle='#00e5ff'; c.shadowBlur=22
-  c.beginPath(); c.ellipse(223,163,15,9,0,0,Math.PI*2); c.fill()
-  c.beginPath(); c.ellipse(289,163,15,9,0,0,Math.PI*2); c.fill()
-  c.fillStyle='#001122'; c.shadowBlur=0
-  c.beginPath(); c.arc(223,163,5,0,Math.PI*2); c.fill()
-  c.beginPath(); c.arc(289,163,5,0,Math.PI*2); c.fill()
-
-  // Pupils glow
-  c.fillStyle='rgba(0,229,255,.5)'; c.shadowBlur=8; c.shadowColor='#00e5ff'
-  c.beginPath(); c.arc(223,163,2,0,Math.PI*2); c.fill()
-  c.beginPath(); c.arc(289,163,2,0,Math.PI*2); c.fill()
+  ctx.fillStyle=`rgba(0,229,255,${flick})`
+  ctx.shadowBlur=18
+  ;[[-16*sc,-92*sc],[16*sc,-92*sc]].forEach(([ex,ey])=>{
+    ctx.beginPath(); ctx.ellipse(ex,ey,9*sc,5.5*sc,0,0,Math.PI*2); ctx.fill()
+  })
+  ctx.fillStyle='#001122'; ctx.shadowBlur=0
+  ;[[-16*sc,-92*sc],[16*sc,-92*sc]].forEach(([ex,ey])=>{
+    ctx.beginPath(); ctx.arc(ex,ey,3*sc,0,Math.PI*2); ctx.fill()
+  })
 
   // Neck
-  c.strokeStyle='#00e5ff'; c.lineWidth=2; c.shadowBlur=10
-  c.beginPath()
-  c.moveTo(232,258); c.lineTo(232,296)
-  c.moveTo(280,258); c.lineTo(280,296)
-  c.stroke()
+  ctx.strokeStyle=`rgba(0,229,255,${.8*flick})`
+  ctx.lineWidth=2*sc; glow('#00e5ff',10)
+  ctx.beginPath()
+  ctx.moveTo(-12*sc,-44*sc); ctx.lineTo(-12*sc,-24*sc)
+  ctx.moveTo( 12*sc,-44*sc); ctx.lineTo( 12*sc,-24*sc)
+  ctx.stroke()
 
-  // Shoulders & body
-  c.lineWidth=2.5; c.shadowBlur=12
-  c.beginPath()
-  c.moveTo(232,296); c.bezierCurveTo(195,305,145,318,138,368); c.lineTo(155,490)
-  c.moveTo(280,296); c.bezierCurveTo(317,305,367,318,374,368); c.lineTo(357,490)
-  c.moveTo(138,368); c.bezierCurveTo(128,390,126,412,140,438); c.lineTo(118,490)
-  c.moveTo(374,368); c.bezierCurveTo(384,390,386,412,372,438); c.lineTo(394,490)
-  c.moveTo(256,296); c.lineTo(256,490)
-  c.moveTo(155,345); c.lineTo(357,345)
-  c.moveTo(158,390); c.lineTo(354,390)
-  c.moveTo(163,435); c.lineTo(349,435)
-  c.stroke()
+  // Body outline
+  ctx.lineWidth=2.2*sc; glow('#00e5ff',12)
+  ctx.beginPath()
+  ctx.moveTo(-12*sc,-24*sc); ctx.bezierCurveTo(-30*sc,-18*sc,-60*sc,-10*sc,-65*sc,25*sc)
+  ctx.lineTo(-58*sc,135*sc)
+  ctx.moveTo(12*sc,-24*sc); ctx.bezierCurveTo(30*sc,-18*sc,60*sc,-10*sc,65*sc,25*sc)
+  ctx.lineTo(58*sc,135*sc)
+  // Arms
+  ctx.moveTo(-65*sc,25*sc); ctx.bezierCurveTo(-80*sc,40*sc,-82*sc,70*sc,-72*sc,95*sc); ctx.lineTo(-85*sc,135*sc)
+  ctx.moveTo(65*sc,25*sc);  ctx.bezierCurveTo(80*sc,40*sc,82*sc,70*sc,72*sc,95*sc);   ctx.lineTo(85*sc,135*sc)
+  // Center line
+  ctx.moveTo(0*sc,-24*sc); ctx.lineTo(0*sc,135*sc)
+  // Horizontal lines
+  ;[-5,25,55,90].forEach(y=>{
+    ctx.moveTo(-62*sc,y*sc); ctx.lineTo(62*sc,y*sc)
+  })
+  ctx.stroke()
 
-  // Circuit detail
-  c.strokeStyle='#004466'; c.lineWidth=1; c.shadowBlur=4
+  // Circuit lines
+  ctx.strokeStyle=`rgba(0,68,102,${.8*flick})`; ctx.lineWidth=.8*sc
   for(let i=0;i<8;i++){
-    c.beginPath()
-    c.moveTo(175,308+i*14); c.lineTo(185+Math.random()*35,308+i*14)
-    c.moveTo(337,308+i*14); c.lineTo(327-Math.random()*35,308+i*14)
-    c.stroke()
+    const yy = (-15+i*18)*sc
+    ctx.beginPath()
+    ctx.moveTo(-60*sc,yy); ctx.lineTo((-40+Math.sin(i*3+t)*8)*sc,yy)
+    ctx.moveTo(60*sc,yy);  ctx.lineTo((40-Math.sin(i*2.5+t)*8)*sc,yy)
+    ctx.stroke()
   }
+
+  noGlow()
 
   // Scanlines overlay
-  c.strokeStyle='rgba(0,229,255,.03)'; c.lineWidth=1; c.shadowBlur=0
-  for(let y=0;y<S;y+=3){c.beginPath();c.moveTo(0,y);c.lineTo(S,y);c.stroke()}
-
-  // Vignette
-  const vg=c.createRadialGradient(256,256,150,256,256,300)
-  vg.addColorStop(0,'rgba(0,0,0,0)'); vg.addColorStop(1,'rgba(0,0,0,.7)')
-  c.fillStyle=vg; c.fillRect(0,0,S,S)
-
-  return new THREE.CanvasTexture(cv)
-}
-
-function makeSkillTex(name) {
-  const cv=document.createElement('canvas'); cv.width=280; cv.height=68
-  const c=cv.getContext('2d')
-  c.fillStyle='rgba(0,18,42,.93)'; c.fillRect(0,0,280,68)
-  c.strokeStyle='#006688'; c.lineWidth=1.5; c.strokeRect(1,1,278,66)
-  // corner accents
-  [[3,3],[277,3],[3,65],[277,65]].forEach(([x,y])=>{
-    c.fillStyle='#00e5ff'; c.fillRect(x-3,y-3,6,6)
-  })
-  c.fillStyle='#00e5ff'; c.font='bold 13px Courier New'
-  c.textAlign='center'; c.textBaseline='middle'
-  c.shadowColor='#00e5ff'; c.shadowBlur=10
-  c.fillText(name,140,34)
-  return new THREE.CanvasTexture(cv)
-}
-
-function makeLabelTex(text, color='#00e5ff') {
-  const cv=document.createElement('canvas'); cv.width=320; cv.height=52
-  const c=cv.getContext('2d')
-  c.fillStyle=color; c.font='bold 15px Courier New'
-  c.textAlign='center'; c.textBaseline='middle'
-  c.shadowColor=color; c.shadowBlur=14
-  c.fillText(text,160,26)
-  return new THREE.CanvasTexture(cv)
-}
-
-// ── RENDERER ─────────────────────────────────────────────────────────────────
-
-const wrap = document.getElementById('canvas-wrap')
-const W = window.innerWidth, H = window.innerHeight - 52
-
-const renderer = new THREE.WebGLRenderer({ antialias: true })
-renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
-renderer.setSize(W, H)
-renderer.toneMapping = THREE.ACESFilmicToneMapping
-renderer.toneMappingExposure = 1.1
-renderer.outputColorSpace = THREE.SRGBColorSpace
-wrap.appendChild(renderer.domElement)
-
-const clock = new THREE.Clock()
-const raycaster = new THREE.Raycaster()
-const mouse = new THREE.Vector2()
-let currentView = 'hologram'
-
-// ── HOLOGRAM SCENE ───────────────────────────────────────────────────────────
-
-const HS = new THREE.Scene()
-HS.background = new THREE.Color('#000810')
-HS.fog = new THREE.Fog('#000810', 14, 30)
-
-const HC = new THREE.PerspectiveCamera(44, W/H, 0.1, 100)
-HC.position.set(0, 1, 5.5)
-
-const HCtrl = new OrbitControls(HC, renderer.domElement)
-HCtrl.enableZoom = false; HCtrl.enablePan = false
-HCtrl.minPolarAngle = Math.PI/4; HCtrl.maxPolarAngle = Math.PI/1.6
-HCtrl.rotateSpeed = 0.45; HCtrl.autoRotate = true; HCtrl.autoRotateSpeed = 0.5
-
-// Lights
-HS.add(new THREE.AmbientLight('#000810', 0.1))
-const hL1 = new THREE.PointLight('#00e5ff', 2.5, 12); hL1.position.set(0,5,0); HS.add(hL1)
-const hL2 = new THREE.PointLight('#0033ff', 1.2, 8);  hL2.position.set(0,-2,0); HS.add(hL2)
-
-// Stars
-function addStars(scene, n=2000) {
-  const pos = new Float32Array(n*3)
-  for(let i=0;i<n;i++){
-    const r=50+Math.random()*20, t=Math.random()*Math.PI*2, p=Math.acos(2*Math.random()-1)
-    pos[i*3]=r*Math.sin(p)*Math.cos(t); pos[i*3+1]=r*Math.sin(p)*Math.sin(t); pos[i*3+2]=r*Math.cos(p)
+  ctx.save()
+  ctx.globalAlpha = .06*flick
+  for(let sy=-145;sy<145;sy+=3){
+    const scanA = .5+.5*Math.sin(sy*.08+t*3)
+    ctx.fillStyle=`rgba(0,229,255,${scanA*.3})`
+    ctx.fillRect(-102*sc,sy*sc,204*sc,1.2*sc)
   }
-  const geo=new THREE.BufferGeometry()
-  geo.setAttribute('position',new THREE.BufferAttribute(pos,3))
-  scene.add(new THREE.Points(geo,new THREE.PointsMaterial({color:'#ffffff',size:.12,transparent:true,opacity:.55})))
-}
-addStars(HS)
+  ctx.globalAlpha=1
+  ctx.restore()
 
-// Grid floor
-function addGrid(scene, y=-2.2) {
-  const g=new THREE.GridHelper(24,48,new THREE.Color('#00ccff'),new THREE.Color('#002233'))
-  g.position.y=y; g.material.transparent=true; g.material.opacity=0.12; scene.add(g)
-  ;[1.0,2.2,3.6,5.2].forEach((r,i)=>{
-    const m=new THREE.Mesh(
-      new THREE.RingGeometry(r-.015,r,80),
-      new THREE.MeshBasicMaterial({color:'#00e5ff',transparent:true,opacity:.1/(i+1),side:THREE.DoubleSide})
-    )
-    m.rotation.x=-Math.PI/2; m.position.y=y; scene.add(m)
+  ctx.restore()
+}
+
+function roundRect(ctx,x,y,w,h,r){
+  ctx.beginPath(); ctx.moveTo(x+r,y); ctx.lineTo(x+w-r,y)
+  ctx.quadraticCurveTo(x+w,y,x+w,y+r); ctx.lineTo(x+w,y+h-r)
+  ctx.quadraticCurveTo(x+w,y+h,x+w-r,y+h); ctx.lineTo(x+r,y+h)
+  ctx.quadraticCurveTo(x,y+h,x,y+h-r); ctx.lineTo(x,y+r)
+  ctx.quadraticCurveTo(x,y,x+r,y); ctx.closePath()
+}
+
+// ── DRAW BRAIN SCENE ─────────────────────────────────────────────────────────
+let deptNodes = [] // computed each frame for click hit-testing
+
+function drawBrain() {
+  const cx = W/2, cy = H/2 - 20
+
+  ctx.fillStyle='#000812'; ctx.fillRect(0,0,W,H)
+
+  // Stars
+  STARS.forEach(s=>{
+    const sx=cx+s.x*W*.55, sy=cy+s.y*H*.52
+    ctx.beginPath(); ctx.arc(sx,sy,s.r,0,Math.PI*2)
+    ctx.fillStyle=`rgba(255,255,255,${s.a*.5})`; ctx.fill()
   })
-  return g
-}
-const hGrid = addGrid(HS)
 
-// Projection beam
-const beamMat = new THREE.ShaderMaterial({
-  vertexShader:BEAM_VERT, fragmentShader:BEAM_FRAG,
-  uniforms:{time:{value:0},col:{value:new THREE.Color('#00e5ff')},opacity:{value:.22}},
-  transparent:true, side:THREE.DoubleSide, depthWrite:false, blending:THREE.AdditiveBlending
-})
-const bG = new THREE.Group(); bG.position.set(0,-2.2,0); HS.add(bG)
-const cone1 = new THREE.Mesh(new THREE.ConeGeometry(1.4,4,48,1,true), beamMat)
-cone1.position.y=2; bG.add(cone1)
-const cone2 = new THREE.Mesh(new THREE.ConeGeometry(.45,4,24,1,true), beamMat)
-cone2.position.y=2; bG.add(cone2)
-const disc = new THREE.Mesh(new THREE.CircleGeometry(1.4,48),
-  new THREE.MeshBasicMaterial({color:'#00e5ff',transparent:true,opacity:.2,side:THREE.DoubleSide,blending:THREE.AdditiveBlending,depthWrite:false}))
-disc.rotation.x=-Math.PI/2; bG.add(disc)
-
-// Avatar plane
-const avatarTex = makeAvatarTex()
-const avatarMat = new THREE.ShaderMaterial({
-  vertexShader:AVATAR_VERT, fragmentShader:AVATAR_FRAG,
-  uniforms:{map:{value:avatarTex},time:{value:0},opacity:{value:.9},glow:{value:new THREE.Color('#00e5ff')}},
-  transparent:true, side:THREE.DoubleSide, depthWrite:false
-})
-HS.add(new THREE.Mesh(new THREE.PlaneGeometry(2.2,2.8), avatarMat))
-
-// Particles
-;(()=>{
-  const N=200, pos=new Float32Array(N*3), sz=new Float32Array(N), lf=new Float32Array(N), vel=new Float32Array(N*3)
-  for(let i=0;i<N;i++){
-    const a=Math.random()*Math.PI*2, r=Math.random()*1.1
-    pos[i*3]=Math.cos(a)*r; pos[i*3+1]=(Math.random()-.4)*2.8; pos[i*3+2]=(Math.random()-.5)*.3
-    sz[i]=Math.random()*5+2; lf[i]=Math.random()
-    vel[i*3]=(Math.random()-.5)*.6; vel[i*3+1]=Math.random()*.25+.05; vel[i*3+2]=(Math.random()-.5)*.25
+  // Grid floor
+  ctx.save()
+  for(let i=0;i<=16;i++){
+    const p=i/16, yy=lerp(cy+H*.18,H+20,p*p)
+    const ww=lerp(0,W*1.5,p*p), xx=cx-ww/2
+    ctx.beginPath(); ctx.moveTo(xx,yy); ctx.lineTo(xx+ww,yy)
+    ctx.strokeStyle=`rgba(0,34,51,${.8*(1-p)})`; ctx.lineWidth=.6; ctx.stroke()
   }
-  const geo=new THREE.BufferGeometry()
-  geo.setAttribute('position',new THREE.BufferAttribute(pos,3))
-  geo.setAttribute('aSize',new THREE.BufferAttribute(sz,1))
-  geo.setAttribute('aLife',new THREE.BufferAttribute(lf,1))
-  geo.setAttribute('aVel',new THREE.BufferAttribute(vel,3))
-  window._partMat = new THREE.ShaderMaterial({
-    vertexShader:PART_VERT, fragmentShader:PART_FRAG,
-    uniforms:{time:{value:0},col:{value:new THREE.Color('#00e5ff')}},
-    transparent:true, blending:THREE.AdditiveBlending, depthWrite:false
+  for(let j=0;j<=16;j++){
+    const bx=lerp(cx-W*.75,cx+W*.75,j/16)
+    ctx.beginPath(); ctx.moveTo(cx+(bx-cx)*.0,cy+H*.18); ctx.lineTo(bx,H+20)
+    ctx.strokeStyle='rgba(0,34,51,.5)'; ctx.lineWidth=.5; ctx.stroke()
+  }
+  ctx.restore()
+
+  // Ambient glow behind brain
+  const bg = ctx.createRadialGradient(cx,cy,20,cx,cy,W*.18)
+  bg.addColorStop(0,'rgba(0,40,80,.35)'); bg.addColorStop(1,'rgba(0,0,0,0)')
+  ctx.fillStyle=bg; ctx.fillRect(0,0,W,H)
+
+  // Brain mesh
+  drawBrainMesh(cx, cy, t)
+
+  // Dept positions
+  deptNodes = []
+  DEPTS.forEach((d,i)=>{
+    const tier = Math.floor(i/4)
+    const orR = (.28+tier*.09)*Math.min(W,H)
+    const orY = (i%2===0?.14:-.14)*(1+tier*.3)*H
+    const baseA = (i/DEPTS.length)*Math.PI*2
+    const spd = (.12+i*.025)*(i%2===0?1:-1)
+    const a = baseA + t*spd
+    const dx = cx + Math.cos(a)*orR
+    const dy = cy + orY*.35 + Math.sin(a)*orR*.4
+
+    // Synapse line to brain
+    const sel = selDept===i
+    ctx.save()
+    ctx.setLineDash([4,8])
+    ctx.lineDashOffset = -(t*(sel?40:15))
+    ctx.beginPath(); ctx.moveTo(cx,cy); ctx.lineTo(dx,dy)
+    ctx.strokeStyle = sel ? `rgba(0,229,255,.5)` : `rgba(0,40,60,.4)`
+    ctx.lineWidth = sel?1.5:.7; ctx.stroke()
+    ctx.setLineDash([]); ctx.restore()
+
+    // Halo
+    const pulse = 1+.2*Math.sin(t*2+baseA)
+    const [r,g,b]=hex2rgb(d.c)
+    ctx.save()
+    glow(d.c, sel?28:14)
+    ctx.beginPath(); ctx.arc(dx,dy,12*pulse,0,Math.PI*2)
+    ctx.strokeStyle=d.c; ctx.lineWidth=sel?2:1.2; ctx.stroke()
+    noGlow()
+
+    // Ring
+    ctx.save(); ctx.translate(dx,dy); ctx.scale(1,.28)
+    ctx.beginPath(); ctx.arc(0,0,18*pulse,0,Math.PI*2)
+    ctx.strokeStyle=`rgba(${r},${g},${b},.45)`; ctx.lineWidth=1.5; ctx.stroke()
+    ctx.restore()
+
+    // Core dot
+    ctx.beginPath(); ctx.arc(dx,dy,7,0,Math.PI*2)
+    const dg=ctx.createRadialGradient(dx,dy,0,dx,dy,7)
+    dg.addColorStop(0,'#ffffff'); dg.addColorStop(.4,d.c); dg.addColorStop(1,d.c+'88')
+    ctx.fillStyle=dg; ctx.fill()
+    ctx.restore()
+
+    // Label
+    ctx.save()
+    ctx.font=`bold 9px Courier New`; ctx.textAlign='center'; ctx.textBaseline='top'
+    ctx.fillStyle=sel?d.c:'#005566'
+    if(sel) glow(d.c,10)
+    ctx.fillText(d.n, dx, dy+18)
+    noGlow()
+    const ag=d.ag.filter(a=>a.a).length
+    ctx.font='8px Courier New'; ctx.fillStyle='#003344'
+    ctx.fillText(ag+'/'+d.ag.length+' ACTIVE', dx, dy+30)
+    ctx.restore()
+
+    deptNodes.push({x:dx,y:dy,r:20,i})
+
+    // Agent neurons (expand when selected)
+    if(sel){
+      const exp = Math.min(1, expandT/0.6)
+      d.ag.forEach((ag,ai)=>{
+        const aa = (ai/d.ag.length)*Math.PI*2
+        const nr = 55*easeOut(exp)
+        const nx = dx+Math.cos(aa+t*.35)*nr
+        const ny = dy+Math.sin(aa+t*.35)*nr*.42
+        const np = 1+.2*Math.sin(t*3.5+ai*2.1)
+        ctx.save()
+        glow(d.c, ag.a?12:4)
+        ctx.beginPath(); ctx.arc(nx,ny,5*np,0,Math.PI*2)
+        ctx.fillStyle = ag.a ? d.c : '#003344'; ctx.fill()
+        noGlow()
+        // connection to dept
+        ctx.beginPath(); ctx.moveTo(dx,dy); ctx.lineTo(nx,ny)
+        ctx.strokeStyle=ag.a?`${d.c}66`:'#002233'; ctx.lineWidth=.6; ctx.stroke()
+        // name
+        ctx.font='7.5px Courier New'; ctx.textAlign='center'; ctx.textBaseline='top'
+        ctx.fillStyle=ag.a?d.c+'99':'#003344'
+        ctx.fillText(ag.n, nx, ny+7)
+        ctx.restore()
+      })
+    }
   })
-  HS.add(new THREE.Points(geo, window._partMat))
-})()
-
-// Orbit rings
-[[1.9,0],[2.5,Math.PI/6],[3.1,-Math.PI/5],[3.7,Math.PI/4]].forEach(([r,tilt],i)=>{
-  const m=new THREE.Mesh(new THREE.RingGeometry(r-.012,r+.012,72),
-    new THREE.MeshBasicMaterial({color:'#00e5ff',transparent:true,opacity:.12+i*.02,side:THREE.DoubleSide,depthWrite:false}))
-  m.rotation.x=tilt; HS.add(m)
-})
-
-// Skill tags
-const SKILLS=[
-  {name:'MACHINE LEARNING',level:95,desc:'Deep neural network design & training pipelines.'},
-  {name:'NLP PROCESSING',  level:88,desc:'Language model fine-tuning and RAG systems.'},
-  {name:'COMPUTER VISION', level:82,desc:'Real-time image analysis and segmentation.'},
-  {name:'DATA ENGINEERING',level:79,desc:'Distributed processing at petabyte scale.'},
-  {name:'API DESIGN',      level:91,desc:'RESTful & GraphQL microservice architecture.'},
-  {name:'CLOUD DEPLOY',    level:85,desc:'Kubernetes orchestration across multi-cloud.'},
-]
-
-const skillObjs = SKILLS.map((sk,i)=>{
-  const spr=new THREE.Sprite(new THREE.SpriteMaterial({map:makeSkillTex(sk.name),transparent:true,depthWrite:false}))
-  spr.scale.set(1.45,.44,1); spr.userData={sk}; HS.add(spr)
-  return {spr,sk,r:1.8+(i%3)*.78,spd:.22+i*.06,y:(i%2===0?.55:-.4)+i*.08,a0:(i/SKILLS.length)*Math.PI*2}
-})
-const hClickable = skillObjs.map(o=>o.spr)
-
-// Agent label
-const nameSpr = new THREE.Sprite(new THREE.SpriteMaterial({map:makeLabelTex('NEXUS — AI ARCHITECT','#00e5ff'),transparent:true}))
-nameSpr.scale.set(2.6,.32,1); nameSpr.position.y=-1.72; HS.add(nameSpr)
-const roleSpr = new THREE.Sprite(new THREE.SpriteMaterial({map:makeLabelTex('SENIOR AI ARCHITECT','#005577'),transparent:true}))
-roleSpr.scale.set(2,.22,1); roleSpr.position.y=-2.0; HS.add(roleSpr)
-
-// Hologram composer
-const HC_comp = new EffectComposer(renderer)
-HC_comp.addPass(new RenderPass(HS, HC))
-HC_comp.addPass(new UnrealBloomPass(new THREE.Vector2(W,H), 1.8, .85, .1))
-
-// ── BRAIN SCENE ──────────────────────────────────────────────────────────────
-
-const BS = new THREE.Scene()
-BS.background = new THREE.Color('#000812')
-BS.fog = new THREE.Fog('#000812', 14, 32)
-
-const BC = new THREE.PerspectiveCamera(50, W/H, 0.1, 100)
-BC.position.set(0,3,9)
-
-const BCtrl = new OrbitControls(BC, renderer.domElement)
-BCtrl.enablePan = false; BCtrl.minDistance=4; BCtrl.maxDistance=18
-BCtrl.autoRotate=true; BCtrl.autoRotateSpeed=.28; BCtrl.rotateSpeed=.5
-BCtrl.enabled = false
-
-BS.add(new THREE.AmbientLight('#000810',.05))
-const bL1=new THREE.PointLight('#00e5ff',3,14); bL1.position.set(0,4,0); BS.add(bL1)
-const bL2=new THREE.PointLight('#0033ff',1.5,10); bL2.position.set(0,-3,0); BS.add(bL2)
-addStars(BS,3000)
-const bGrid = addGrid(BS,-3.5)
-
-// Brain
-const brainMat = new THREE.ShaderMaterial({
-  vertexShader:BRAIN_VERT, fragmentShader:BRAIN_FRAG,
-  uniforms:{time:{value:0},base:{value:new THREE.Color('#001a3a')},glow:{value:new THREE.Color('#00e5ff')},opacity:{value:.75}},
-  transparent:true, depthWrite:false
-})
-const brainGeo = new THREE.IcosahedronGeometry(1.55,5)
-BS.add(new THREE.Mesh(brainGeo, brainMat))
-const wm = new THREE.Mesh(brainGeo, new THREE.MeshBasicMaterial({color:'#00e5ff',wireframe:true,transparent:true,opacity:.06}))
-wm.scale.setScalar(1.005); BS.add(wm)
-BS.add(new THREE.Mesh(new THREE.SphereGeometry(1.85,32,32),
-  new THREE.MeshBasicMaterial({color:'#00e5ff',transparent:true,opacity:.03,side:THREE.BackSide,blending:THREE.AdditiveBlending,depthWrite:false})))
-
-// Departments
-const DEPTS=[
-  {id:'d1',name:'RESEARCH CORE',    color:'#00e5ff',desc:'Advanced AI research cluster.',  agents:[{n:'NEXUS',active:true},{n:'ARIA',active:true},{n:'HELIOS',active:false}]},
-  {id:'d2',name:'DATA MINING',      color:'#0088ff',desc:'Data extraction & recognition.',  agents:[{n:'VECTOR',active:true},{n:'SIGMA',active:true}]},
-  {id:'d3',name:'NEURAL SYNTHESIS', color:'#00ffaa',desc:'Knowledge synthesis node.',       agents:[{n:'LYRA',active:true},{n:'ORION',active:true},{n:'PULSE',active:false},{n:'ECHO',active:true}]},
-  {id:'d4',name:'DEPLOYMENT',       color:'#ff6600',desc:'Production orchestration.',       agents:[{n:'TITAN',active:true},{n:'ATLAS',active:false}]},
-  {id:'d5',name:'SECURITY',         color:'#aa00ff',desc:'Threat detection & audit.',       agents:[{n:'SHIELD',active:true},{n:'CIPHER',active:true}]},
-  {id:'d6',name:'ANALYTICS',        color:'#ffcc00',desc:'Metrics & predictive analytics.', agents:[{n:'PRISM',active:true},{n:'LENS',active:false}]},
-]
-
-const deptObjs = DEPTS.map((d,i)=>{
-  const col=new THREE.Color(d.color)
-  const tier=Math.floor(i/4)
-  const orR=2.6+tier*1.0, orY=(i%2===0?.8:-.8)*(1+tier*.3)
-  const orA=(i/DEPTS.length)*Math.PI*2, orS=(0.12+i*.025)*(i%2===0?1:-1)
-
-  const sph=new THREE.Mesh(new THREE.SphereGeometry(.22,16,16),new THREE.MeshBasicMaterial({color:col}))
-  BS.add(sph)
-  const ring=new THREE.Mesh(new THREE.RingGeometry(.28,.34,32),
-    new THREE.MeshBasicMaterial({color:col,transparent:true,opacity:.5,side:THREE.DoubleSide,blending:THREE.AdditiveBlending,depthWrite:false}))
-  BS.add(ring)
-  const halo=new THREE.Mesh(new THREE.SphereGeometry(.45,12,12),
-    new THREE.MeshBasicMaterial({color:col,transparent:true,opacity:.04,side:THREE.BackSide,blending:THREE.AdditiveBlending,depthWrite:false}))
-  BS.add(halo)
-  const lbl=new THREE.Sprite(new THREE.SpriteMaterial({map:makeLabelTex(d.name,d.color),transparent:true}))
-  lbl.scale.set(1.6,.24,1); BS.add(lbl)
-
-  sph.userData={d,i}
-  return {sph,ring,halo,lbl,d,orR,orY,orA,orS,pos:new THREE.Vector3()}
-})
-
-// Synapse lines
-const synLines = []
-for(let i=0;i<DEPTS.length;i++){
-  const j=(i+1)%DEPTS.length
-  const geo=new THREE.BufferGeometry()
-  const arr=new Float32Array(6); geo.setAttribute('position',new THREE.BufferAttribute(arr,3))
-  const mat=new THREE.LineBasicMaterial({color:'#003344',transparent:true,opacity:.25})
-  const ln=new THREE.Line(geo,mat); BS.add(ln)
-  synLines.push({ln,fi:i,ti:j,mat,pos:geo.attributes.position})
 }
 
-const bClickable = deptObjs.map(o=>o.sph)
+function drawBrainMesh(cx,cy,t) {
+  const sc = Math.min(W,H)*.115
+  const segs = 10  // icosahedron-like segments
 
-// Agent neurons
-const aNeurons=[]
-let selDept=-1
+  // Animate surface with noise
+  function nPt(a,b,amp=1){
+    const nx = Math.sin(a*3.1+t*.3)*Math.cos(b*2.7-t*.2)
+    const ny = Math.sin(a*1.8+t*.25)*Math.sin(b*4.1+t*.15)
+    return amp*(nx*.12+ny*.08)
+  }
 
-// Brain composer
-const BC_comp = new EffectComposer(renderer)
-BC_comp.addPass(new RenderPass(BS,BC))
-BC_comp.addPass(new UnrealBloomPass(new THREE.Vector2(W,H),2.0,.9,.08))
+  // Inner filled shape
+  ctx.save()
+  const brain_pts = []
+  const layers = 14, pts_per = 22
+  for(let li=0;li<layers;li++){
+    const phi = (li/(layers-1))*Math.PI
+    const row=[]
+    for(let pi=0;pi<=pts_per;pi++){
+      const theta = (pi/pts_per)*Math.PI*2
+      const r = sc*(1 + nPt(phi,theta))
+      const x = cx + r*Math.sin(phi)*Math.cos(theta)
+      const y = cy - r*Math.cos(phi)*.62 + r*Math.sin(phi)*Math.sin(theta)*.3
+      row.push([x,y])
+    }
+    brain_pts.push(row)
+  }
 
-// ── CLICK INTERACTION ─────────────────────────────────────────────────────────
+  // Draw filled silhouette
+  ctx.beginPath()
+  brain_pts[0].forEach(([x,y],i)=>i===0?ctx.moveTo(x,y):ctx.lineTo(x,y))
+  for(let li=1;li<layers;li++){
+    brain_pts[li].forEach(([x,y],pi)=>{
+      if(pi===0) ctx.moveTo(x,y); else ctx.lineTo(x,y)
+    })
+  }
+  const fillG = ctx.createRadialGradient(cx,cy-sc*.1,sc*.1,cx,cy,sc*1.2)
+  fillG.addColorStop(0,'rgba(0,40,80,.65)')
+  fillG.addColorStop(.6,'rgba(0,20,50,.4)')
+  fillG.addColorStop(1,'rgba(0,5,18,.1)')
+  ctx.fillStyle=fillG; ctx.fill()
 
-renderer.domElement.addEventListener('click', e=>{
-  const rect=renderer.domElement.getBoundingClientRect()
-  mouse.x=((e.clientX-rect.left)/rect.width)*2-1
-  mouse.y=-((e.clientY-rect.top)/rect.height)*2+1
-  if(currentView==='hologram'){
-    raycaster.setFromCamera(mouse,HC)
-    const h=raycaster.intersectObjects(hClickable)
-    if(h.length) showSkill(h[0].object.userData.sk)
+  // Draw wireframe lines
+  const pulse = .5+.5*Math.sin(t*1.8)
+  for(let li=0;li<layers;li+=2){
+    ctx.beginPath()
+    brain_pts[li].forEach(([x,y],i)=>i===0?ctx.moveTo(x,y):ctx.lineTo(x,y))
+    ctx.strokeStyle=`rgba(0,229,255,${.05+pulse*.03})`; ctx.lineWidth=.6; ctx.stroke()
+  }
+  for(let pi=0;pi<pts_per;pi+=3){
+    ctx.beginPath()
+    brain_pts.forEach(row=>{
+      const [x,y]=row[pi]||row[0]
+      ctx.lineTo(x,y)
+    })
+    ctx.strokeStyle=`rgba(0,229,255,${.04+pulse*.025})`; ctx.lineWidth=.5; ctx.stroke()
+  }
+
+  // Bright equatorial rim (fresnel-like)
+  ctx.save(); ctx.translate(cx,cy); ctx.scale(1,.28)
+  const rim=ctx.createRadialGradient(0,0,sc*.88,0,0,sc*1.12)
+  rim.addColorStop(0,'rgba(0,229,255,0)')
+  rim.addColorStop(.7,`rgba(0,229,255,${.18+pulse*.12})`)
+  rim.addColorStop(1,'rgba(0,229,255,0)')
+  ctx.strokeStyle=rim; ctx.lineWidth=sc*.24
+  ctx.beginPath(); ctx.arc(0,0,sc,0,Math.PI*2); ctx.stroke()
+  ctx.restore()
+
+  // Scanline sweeps
+  for(let s=0;s<4;s++){
+    const scanY = cy - sc + ((t*50+s*40)%(sc*2))
+    if(scanY>cy-sc && scanY<cy+sc){
+      const dx2 = Math.sqrt(Math.max(0,sc*sc-(scanY-cy)*(scanY-cy)))
+      ctx.beginPath(); ctx.moveTo(cx-dx2,scanY); ctx.lineTo(cx+dx2,scanY)
+      ctx.strokeStyle=`rgba(0,229,255,.25)`; ctx.lineWidth=.8; ctx.stroke()
+    }
+  }
+
+  // Outer glow halo
+  ctx.save(); ctx.translate(cx,cy); ctx.scale(1,.62)
+  const halo=ctx.createRadialGradient(0,0,sc*.9,0,0,sc*1.4)
+  halo.addColorStop(0,`rgba(0,229,255,${.07+pulse*.05})`)
+  halo.addColorStop(1,'rgba(0,229,255,0)')
+  ctx.fillStyle=halo; ctx.beginPath(); ctx.arc(0,0,sc*1.4,0,Math.PI*2); ctx.fill()
+  ctx.restore()
+
+  // Sparkle dots around brain
+  for(let sp=0;sp<12;sp++){
+    const sa = sp*Math.PI*2/12+t*.4
+    const sr = sc*(1.05+.15*Math.sin(t+sp))
+    const sx = cx+Math.cos(sa)*sr, sy=cy+Math.sin(sa)*sr*.6
+    const alpha = .4+.4*Math.sin(t*2+sp)
+    glow('#00e5ff',8)
+    ctx.beginPath(); ctx.arc(sx,sy,1.5,0,Math.PI*2)
+    ctx.fillStyle=`rgba(0,229,255,${alpha})`; ctx.fill()
+  }
+  noGlow()
+  ctx.restore()
+}
+
+// ── ANIMATION LOOP ────────────────────────────────────────────────────────────
+let hoverIdx = -1
+let lastTime = 0
+
+function loop(ts) {
+  const dt = Math.min((ts - lastTime)/1000, .05)
+  lastTime = ts
+  t += dt
+  if(selDept>=0) expandT += dt
+
+  if(view==='holo') drawHolo()
+  else drawBrain()
+
+  requestAnimationFrame(loop)
+}
+requestAnimationFrame(loop)
+
+// ── MOUSE INTERACTION ─────────────────────────────────────────────────────────
+function getPos(e) {
+  const r=cv.getBoundingClientRect()
+  return [e.clientX-r.left, e.clientY-r.top]
+}
+
+cv.addEventListener('mousemove', e=>{
+  if(view!=='holo'){hoverIdx=-1;return}
+  const [mx,my]=getPos(e)
+  hoverIdx=-1
+  ;(window._tagRects||[]).forEach(({x,y,w,h,i})=>{
+    if(mx>=x&&mx<=x+w&&my>=y&&my<=y+h) hoverIdx=i
+  })
+  cv.style.cursor=hoverIdx>=0?'pointer':'default'
+})
+
+cv.addEventListener('click', e=>{
+  const [mx,my]=getPos(e)
+  if(view==='holo'){
+    let hit=-1
+    ;(window._tagRects||[]).forEach(({x,y,w,h,i})=>{
+      if(mx>=x&&mx<=x+w&&my>=y&&my<=y+h) hit=i
+    })
+    if(hit>=0) openSP(hit)
   } else {
-    raycaster.setFromCamera(mouse,BC)
-    const h=raycaster.intersectObjects(bClickable)
-    if(h.length){const {d,i}=h[0].object.userData; selectDept(d,i)}
+    let hit=-1
+    deptNodes.forEach(({x,y,r,i})=>{
+      if(Math.hypot(mx-x,my-y)<=r+8) hit=i
+    })
+    if(hit>=0){
+      if(selDept===hit){closeDP();selDept=-1;expandT=0}
+      else{selDept=hit;expandT=0;openDP(hit)}
+    }
   }
 })
 
-function showSkill(sk){
-  document.getElementById('sp-name').textContent='◈ '+sk.name
-  document.getElementById('sp-desc').textContent=sk.desc
-  document.getElementById('sp-bar-lbl').textContent='PROFICIENCY — '+sk.level+'%'
-  document.getElementById('sp-bar').style.width='0%'
-  document.getElementById('skill-panel').classList.add('visible')
-  setTimeout(()=>document.getElementById('sp-bar').style.width=sk.level+'%',50)
+// ── SKILL PANEL ───────────────────────────────────────────────────────────────
+function openSP(i){
+  const sk=SKILLS[i]; selSkill=i
+  document.getElementById('sp-n').textContent='◈ '+sk.name
+  document.getElementById('sp-d').textContent=sk.desc
+  document.getElementById('sp-l').textContent='PROFICIENCY — '+sk.level+'%'
+  document.getElementById('sp-b').style.width='0%'
+  document.getElementById('sp').classList.add('on')
+  setTimeout(()=>document.getElementById('sp-b').style.width=sk.level+'%',50)
 }
-window.closeSkillPanel=()=>document.getElementById('skill-panel').classList.remove('visible')
+function closeSP(){document.getElementById('sp').classList.remove('on');selSkill=-1}
+window.closeSP=closeSP
 
-function selectDept(d,i){
-  if(selDept===i){clearNeurons();selDept=-1;document.getElementById('dept-panel').classList.remove('visible');return}
-  selDept=i
-  document.getElementById('dp-name').textContent='◈ '+d.name
-  document.getElementById('dp-name').style.color=d.color
-  document.getElementById('dept-panel').style.borderColor=d.color
-  document.getElementById('dp-desc').textContent=d.desc
-  document.getElementById('dp-agents').innerHTML=d.agents.map(a=>`
-    <div class="agent-row">
-      <span class="agent-dot" style="background:${a.active?d.color:'#003344'};box-shadow:${a.active?'0 0 8px '+d.color:'none'}"></span>
-      <span class="agent-name">${a.n}</span>
-      <span class="agent-status" style="color:${a.active?d.color:'#003344'}">${a.active?'ACTIVE':'IDLE'}</span>
+// ── DEPT PANEL ────────────────────────────────────────────────────────────────
+function openDP(i){
+  const d=DEPTS[i]
+  const el=document.getElementById('dp')
+  el.style.borderColor=d.c
+  document.getElementById('dp-n').textContent='◈ '+d.n
+  document.getElementById('dp-n').style.color=d.c
+  document.getElementById('dp-d').textContent=d.desc
+  document.getElementById('dp-a').innerHTML=d.ag.map(a=>`
+    <div class="arow">
+      <span class="adot" style="background:${a.a?d.c:'#003344'};box-shadow:${a.a?'0 0 8px '+d.c:'none'}"></span>
+      <span class="aname">${a.n}</span>
+      <span class="ast" style="color:${a.a?d.c:'#003344'}">${a.a?'ACTIVE':'IDLE'}</span>
     </div>`).join('')
-  document.getElementById('dept-panel').classList.add('visible')
-  clearNeurons(); spawnNeurons(d,i)
+  el.classList.add('on')
 }
-window.closeDeptPanel=()=>{document.getElementById('dept-panel').classList.remove('visible');selDept=-1;clearNeurons()}
+function closeDP(){document.getElementById('dp').classList.remove('on');selDept=-1;expandT=0}
+window.closeDP=closeDP
 
-function clearNeurons(){
-  aNeurons.forEach(n=>{BS.remove(n.m);BS.remove(n.l)})
-  aNeurons.length=0
+// ── SCENE SWITCH ──────────────────────────────────────────────────────────────
+function switchTo(v){
+  view=v
+  document.querySelectorAll('.tab').forEach(b=>b.classList.remove('on'))
+  document.getElementById('t-'+v).classList.add('on')
+  document.getElementById('hl').textContent = v==='holo'?'◉ HOLOGRAM ACTIVE':'◉ NEURAL MAP ACTIVE'
+  if(v==='holo') closeDP()
+  else closeSP()
 }
-function spawnNeurons(d,di){
-  const col=new THREE.Color(d.color)
-  d.agents.forEach((a,i)=>{
-    const m=new THREE.Mesh(new THREE.SphereGeometry(.1,10,10),new THREE.MeshBasicMaterial({color:col}))
-    BS.add(m)
-    const l=new THREE.Sprite(new THREE.SpriteMaterial({map:makeLabelTex(a.n,d.color),transparent:true}))
-    l.scale.set(.8,.14,1); BS.add(l)
-    aNeurons.push({m,l,di,i,tot:d.agents.length,a0:(i/d.agents.length)*Math.PI*2})
-  })
-}
-
-// ── ANIMATE ──────────────────────────────────────────────────────────────────
-
-function animate(){
-  requestAnimationFrame(animate)
-  const t=clock.getElapsedTime()
-
-  if(currentView==='hologram'){
-    HCtrl.update()
-    avatarMat.uniforms.time.value=t
-    beamMat.uniforms.time.value=t
-    if(window._partMat) window._partMat.uniforms.time.value=t
-    hGrid.material.opacity=.12+Math.sin(t*.6)*.04
-
-    skillObjs.forEach(({spr,r,spd,y,a0})=>{
-      const a=a0+t*spd
-      spr.position.set(Math.cos(a)*r, y+Math.sin(t*.8+a0)*.12, Math.sin(a)*r)
-    })
-    HC_comp.render()
-
-  } else {
-    BCtrl.update()
-    brainMat.uniforms.time.value=t
-    bGrid.material.opacity=.08+Math.sin(t*.4)*.03
-
-    deptObjs.forEach((o,i)=>{
-      const a=o.orA+t*o.orS
-      const x=Math.cos(a)*o.orR, z=Math.sin(a)*o.orR
-      const y=o.orY+Math.sin(t*.6+o.orA)*.15
-      o.pos.set(x,y,z)
-      o.sph.position.copy(o.pos)
-      o.ring.position.copy(o.pos)
-      o.ring.rotation.x=Math.PI/2
-      o.halo.position.copy(o.pos)
-      o.lbl.position.set(x,y+.44,z)
-      const p=1+.22*Math.sin(t*2+o.orA); o.ring.scale.setScalar(p)
-      const sel=selDept===i
-      o.sph.material.color.set(sel?'#ffffff':o.d.color)
-      o.halo.material.opacity=sel?.12:.04
-    })
-
-    synLines.forEach(({ln,fi,ti,mat,pos})=>{
-      const f=deptObjs[fi].pos, to2=deptObjs[ti].pos
-      pos.setXYZ(0,f.x,f.y,f.z); pos.setXYZ(1,to2.x,to2.y,to2.z); pos.needsUpdate=true
-      const act=selDept===fi||selDept===ti
-      mat.opacity=act?.7:.15+Math.sin(t*1.5+fi)*.04
-      mat.color.set(act?'#00e5ff':'#003344')
-    })
-
-    aNeurons.forEach(n=>{
-      const dp=deptObjs[n.di].pos
-      const a=n.a0+t*.38, r=.9+.15*Math.sin(t*.7+n.i)
-      const x=dp.x+Math.cos(a)*r, z=dp.z+Math.sin(a)*r
-      const y=dp.y+Math.sin(t*1.1+n.i*1.3)*.22
-      n.m.position.set(x,y,z); n.l.position.set(x,y+.26,z)
-      n.m.scale.setScalar(1+.2*Math.sin(t*3.5+n.i*2.1))
-    })
-    BC_comp.render()
-  }
-}
-animate()
-
-// ── SWITCH SCENE ─────────────────────────────────────────────────────────────
-
-window.switchScene = v => {
-  currentView=v
-  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'))
-  document.getElementById('btn-'+v).classList.add('active')
-  HCtrl.enabled = v==='hologram'
-  BCtrl.enabled = v==='brain'
-  document.getElementById('hud-left').textContent = v==='hologram' ? '◉ HOLOGRAM ACTIVE' : '◉ NEURAL MAP ACTIVE'
-  if(v==='hologram') document.getElementById('dept-panel').classList.remove('visible')
-  else document.getElementById('skill-panel').classList.remove('visible')
-}
-
-// ── RESIZE ───────────────────────────────────────────────────────────────────
-
-window.addEventListener('resize',()=>{
-  const nw=window.innerWidth, nh=window.innerHeight-52
-  renderer.setSize(nw,nh)
-  HC_comp.setSize(nw,nh); BC_comp.setSize(nw,nh)
-  HC.aspect=nw/nh; HC.updateProjectionMatrix()
-  BC.aspect=nw/nh; BC.updateProjectionMatrix()
-})
-
+window.switchScene = switchTo  // compatibility alias
 </script>
 </body>
 </html>
